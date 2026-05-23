@@ -1,24 +1,44 @@
 import { useState } from "react";
-import { checkBackendHealth } from "./api";
-import "./App.css";
+import { askQuestion } from "./api";
 
 function App() {
-  const [status, setStatus] = useState("");
+  const [question, setQuestion] = useState("");
+  const [answer, setAnswer] = useState("");
+  const [sources, setSources] = useState([]);
 
-  const testBackend = async () => {
-    try {
-      const data = await checkBackendHealth();
-      setStatus(data.status);
-    } catch (error) {
-      setStatus("Backend connection failed");
-    }
+  const handleAsk = async () => {
+    const data = await askQuestion(question);
+    setAnswer(data.answer);
+    setSources(data.sources || []);
   };
 
   return (
-    <div>
+    <div style={{ padding: "30px" }}>
       <h1>Trustworthy Finance RAG</h1>
-      <button onClick={testBackend}>Test Backend</button>
-      <p>{status}</p>
+
+      <textarea
+        rows="4"
+        cols="60"
+        placeholder="Ask: Why is Nvidia stock moving?"
+        value={question}
+        onChange={(e) => setQuestion(e.target.value)}
+      />
+
+      <br /><br />
+
+      <button onClick={handleAsk}>Ask</button>
+
+      <h2>Answer</h2>
+      <pre>{answer}</pre>
+
+      <h2>Sources</h2>
+      {sources.map((source, index) => (
+        <p key={index}>
+          <a href={source.url} target="_blank">
+            {source.title}
+          </a>
+        </p>
+      ))}
     </div>
   );
 }
